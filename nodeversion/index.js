@@ -1,10 +1,9 @@
 // index.js
 const getAccessToken = require('./auth');
 const { getAlbumsFromPlaylist, sortAlbumsByTrackCount } = require('./albums');
+const { playlistId } = require('./config');
 
 (async () => {
-  const playlistId = 'your_playlist_id'; // Replace with your playlist ID
-
   try {
     const accessToken = await getAccessToken();
     const albums = await getAlbumsFromPlaylist(playlistId, accessToken);
