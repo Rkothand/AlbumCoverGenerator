@@ -60,7 +60,7 @@ function sortAlbumsByTrackCount(albums) {
 }
 
 // Function to download album cover images
-async function downloadAlbumCovers(albums, limit = 49) {
+async function downloadAlbumCovers(albums, limit) {
     try {
         // Create the directory if it doesn't exist
         if (!fs.existsSync(albumCoverDir)) {
@@ -71,6 +71,32 @@ async function downloadAlbumCovers(albums, limit = 49) {
         console.error('Error creating album cover directory:', error);
         throw error;
     }
+
+    // Limit the number of albums to download
+    albums = albums.slice(0, limit);
+
+    // Download each album cover image
+    for (const album of albums) {
+        const albumId = album.id;
+        const albumName = album.name;
+        const albumImage = album.image;
+
+        if (albumImage) {
+            const filename = path.join(albumCoverDir, `${albumId}.jpg`);
+            try {
+                const response = await fetch(albumImage);
+                const buffer = await response.buffer();
+                fs.writeFileSync(filename, buffer);
+                console.log(`Downloaded album cover for ${albumName}`);
+            } catch (error) {
+                console.error(`Error downloading album cover for ${albumName}:`, error);
+            }
+        }
+
+    }
+    return albums;
+
+
 }
 
 module.exports = {
