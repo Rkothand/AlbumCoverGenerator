@@ -1,6 +1,6 @@
 // index.js
 const getAccessToken = require('./auth');
-const { getAlbumsFromPlaylist, sortAlbumsByTrackCount, downloadAlbumCovers } = require('./albums');
+const { getAlbumsFromPlaylist, sortAlbumsByTrackCount, downloadAlbumCovers, saveAlbumsAsJson, sortAlbumsAlphabetically } = require('./albums');
 const { playlistId } = require('./config');
 
 (async () => {
@@ -8,11 +8,13 @@ const { playlistId } = require('./config');
     const accessToken = await getAccessToken();
     const albums = await getAlbumsFromPlaylist(playlistId, accessToken);
     const sortedAlbums = sortAlbumsByTrackCount(albums);
-    const albumCovers = await downloadAlbumCovers(sortedAlbums,limit = 49);
+    const alphsortedtop = sortAlbumsAlphabetically(sortedAlbums.slice(0,170));
+    const albumCovers = await downloadAlbumCovers(sortedAlbums,limit = 170);
     // Print sorted albums
-    for (const album of sortedAlbums.slice(0, 49)) {
+    for (const album of sortedAlbums.slice(0, 170)) {
       console.log(`Album: ${album.name}, Track Count: ${album.count}`);
     }
+    saveAlbumsAsJson(sortedAlbums);
   } catch (error) {
     console.error('An error occurred:', error);
   }

@@ -4,6 +4,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const albumCoverDir = path.resolve(__dirname, 'album_covers');
+const albumDataPath = path.resolve(__dirname, 'albums.json');
 
 // Function to retrieve albums from a Spotify playlist
 async function getAlbumsFromPlaylist(playlistId, accessToken) {
@@ -59,48 +60,70 @@ function sortAlbumsByTrackCount(albums) {
   return sortedAlbums;
 }
 
+// Function to sort albums alphabetically
+function sortAlbumsAlphabetically(albums) {
+  const sortedAlbums = Object.entries(albums)
+    .map(([id, info]) => ({ id, ...info }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return sortedAlbums;
+}
+
+function sanitizeFilename(name) {
+  // Replace any characters not allowed in filenames with an underscore
+  return name.replace(/[/\\?%*:|"<>]/g, '_');
+}
+
 // Function to download album cover images
 async function downloadAlbumCovers(albums, limit) {
-    try {
-        // Create the directory if it doesn't exist
-        if (!fs.existsSync(albumCoverDir)) {
-            fs.mkdirSync(albumCoverDir);
-        }
+  try {
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(albumCoverDir)) {
+      fs.mkdirSync(albumCoverDir);
     }
-    catch (error) {
-        console.error('Error creating album cover directory:', error);
-        throw error;
+  } catch (error) {
+    console.error('Error creating album cover directory:', error);
+    throw error;
+  }
+
+  // Limit the number of albums to download
+  albums = albums.slice(0, limit);
+
+  // Download each album cover image
+  for (const album of albums) {
+    const albumId = album.id;
+    const albumName = album.name;
+    const albumImage = album.image;
+    const sanitizedAlbumName = sanitizeFilename(albumName);
+    if (albumImage) {
+      // const filename = path.join(albumCoverDir, `${albumId}.jpg`);
+      const filename = path.join(albumCoverDir, `${sanitizedAlbumName}.jpg`);
+      try {
+        const response = await fetch(albumImage);
+        const buffer = await response.buffer();
+        fs.writeFileSync(filename, buffer);
+        console.log(`Downloaded album cover for ${albumName}`);
+      } catch (error) {
+        console.error(`Error downloading album cover for ${albumName}:`, error);
+      }
     }
+  }
+}
 
-    // Limit the number of albums to download
-    albums = albums.slice(0, limit);
-
-    // Download each album cover image
-    for (const album of albums) {
-        const albumId = album.id;
-        const albumName = album.name;
-        const albumImage = album.image;
-
-        if (albumImage) {
-            const filename = path.join(albumCoverDir, `${albumId}.jpg`);
-            try {
-                const response = await fetch(albumImage);
-                const buffer = await response.buffer();
-                fs.writeFileSync(filename, buffer);
-                console.log(`Downloaded album cover for ${albumName}`);
-            } catch (error) {
-                console.error(`Error downloading album cover for ${albumName}:`, error);
-            }
-        }
-
-    }
-    return albums;
-
-
+// Function to save albums as JSON
+function saveAlbumsAsJson(albums) {
+  try {
+    fs.writeFileSync(albumDataPath, JSON.stringify(albums, null, 2));
+    console.log('Album data saved to albums.json');
+  } catch (error) {
+    console.error('Error saving album data:', error);
+  }
 }
 
 module.exports = {
   getAlbumsFromPlaylist,
   sortAlbumsByTrackCount,
-  downloadAlbumCovers
+  downloadAlbumCovers,
+  saveAlbumsAsJson,
+  sortAlbumsAlphabetically
 };

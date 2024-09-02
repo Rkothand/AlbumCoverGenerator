@@ -1,6 +1,7 @@
 // config.js
 
 
+const PLAYLIST_URL = 'https://open.spotify.com/playlist/4oS616Cl7ZM1uFV0Q6Gy63';
 
 // Function to extract the playlist ID from a Spotify URL
 function getPlaylistIdFromUrl(url) {
