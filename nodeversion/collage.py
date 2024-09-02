@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-def create_image_grid(input_folder, output_file, images_per_row):
+def create_image_grid(input_folder, output_file, images_per_row, final_size=(1000, 1000), quality=85):
     # List all JPG files in the folder
     image_files = [f for f in os.listdir(input_folder) if f.endswith('.jpg')]
     
@@ -34,13 +34,18 @@ def create_image_grid(input_folder, output_file, images_per_row):
         y = row * min_height
         grid_image.paste(img, (x, y))
     
-    # Save the final grid collage
-    grid_image.save(output_file)
-    print(f"Collage saved as {output_file}")
+    # Resize the final image to the specified final size
+    grid_image_resized = grid_image.resize(final_size, Image.LANCZOS)
+    
+    # Save the final image with reduced quality
+    grid_image_resized.save(output_file, format='JPEG', quality=quality)
+    print(f"Collage saved as {output_file}, dimensions: {final_size}, quality: {quality}")
+
 
 # Example usage
 input_folder = './album_covers'
 output_file = 'collage.jpg'
-images_per_row = 13  # Set this to the square root of the number of images
-
-create_image_grid(input_folder, output_file, images_per_row)
+images_per_row = 22  # Set this to the square root of the number of images
+final_size = (1000, 1000)  # Set the desired output size (width, height)
+quality = 100
+create_image_grid(input_folder, output_file, images_per_row, final_size, quality)

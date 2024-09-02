@@ -8,13 +8,13 @@ const { playlistId } = require('./config');
     const accessToken = await getAccessToken();
     const albums = await getAlbumsFromPlaylist(playlistId, accessToken);
     const sortedAlbums = sortAlbumsByTrackCount(albums);
-    const alphsortedtop = sortAlbumsAlphabetically(sortedAlbums.slice(0,170));
-    const albumCovers = await downloadAlbumCovers(sortedAlbums,limit = 170);
+    // const alphsortedtop = sortAlbumsAlphabetically(sortedAlbums.slice(0,170));
+    const albumCovers = await downloadAlbumCovers(sortedAlbums,limit = 488);
     // Print sorted albums
-    for (const album of sortedAlbums.slice(0, 170)) {
+    for (const album of sortedAlbums.slice(0, 488)) {
       console.log(`Album: ${album.name}, Track Count: ${album.count}`);
     }
-    saveAlbumsAsJson(sortedAlbums);
+    // saveAlbumsAsJson(sortedAlbums);
   } catch (error) {
     console.error('An error occurred:', error);
   }
